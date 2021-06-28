@@ -1,5 +1,6 @@
-package com.movie.moviehunt.datasource.database
+package com.movie.moviehunt.datasource.database.mapper
 
+import com.movie.moviehunt.datasource.database.model.CacheMovieEntity
 import com.movie.moviehunt.model.Movie
 import com.movie.moviehunt.util.EntityMapper
 import javax.inject.Inject

@@ -1,9 +1,10 @@
-package com.movie.moviehunt.datasource.database
+package com.movie.moviehunt.datasource.database.room
 
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import com.movie.moviehunt.datasource.database.model.CacheMovieEntity
 
 @Dao
 interface MovieDao {

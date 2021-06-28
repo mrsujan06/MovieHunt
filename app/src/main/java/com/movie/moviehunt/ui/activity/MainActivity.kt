@@ -5,35 +5,30 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.lifecycle.Observer
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.movie.moviehunt.model.Movie
-import com.movie.moviehunt.repository.MainRepository
 import com.movie.moviehunt.ui.screen.HomeScreen
-import com.movie.moviehunt.util.DataState
 import com.movie.moviehunt.ui.viewmodel.MainViewModel
+import com.movie.moviehunt.util.DataState
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.onEach
 import timber.log.Timber
-import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-
-    @Inject
-    lateinit var repository: MainRepository
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
 
-            val viewModel = MainViewModel(repository)
+            val viewModel: MainViewModel = viewModel()
             HomeScreen(viewModel)
             subscribeObservers(viewModel)
         }
     }
 
     private fun subscribeObservers(viewModel: MainViewModel) {
-        viewModel.dataState.observe(this, Observer { dataState ->
+        viewModel.dataState.onEach { dataState ->
 
             when (dataState) {
                 is DataState.Success<List<Movie>> -> {
@@ -48,10 +43,9 @@ class MainActivity : ComponentActivity() {
 
                 is DataState.Loading -> {
                     displayProgressBar(true)
-
                 }
             }
-        })
+        }
     }
 
     private fun displayError(message: String?) {
@@ -70,9 +64,7 @@ class MainActivity : ComponentActivity() {
         Timber.d("Movie list : $movie")
     }
 
-
 }
-
 
 @Preview(showBackground = true)
 @Composable

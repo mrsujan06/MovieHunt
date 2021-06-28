@@ -1,5 +1,6 @@
-package com.movie.moviehunt.datasource.remote
+package com.movie.moviehunt.datasource.remote.model
 
+import com.movie.moviehunt.datasource.remote.model.MovieNetworkEntity
 import com.squareup.moshi.Json
 
 data class MovieResponse(

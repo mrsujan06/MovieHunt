@@ -1,6 +1,6 @@
 package com.movie.moviehunt.di
 
-import com.movie.moviehunt.datasource.remote.MovieService
+import com.movie.moviehunt.datasource.remote.api.MovieService
 import com.movie.moviehunt.util.Constants
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
@@ -25,7 +25,7 @@ object RemoteModule {
             .build()
 
     @Provides
-    open fun providesHttpLoggingInterceptor(): HttpLoggingInterceptor =
+    fun providesHttpLoggingInterceptor(): HttpLoggingInterceptor =
         HttpLoggingInterceptor().apply {
             level = HttpLoggingInterceptor.Level.BODY
         }

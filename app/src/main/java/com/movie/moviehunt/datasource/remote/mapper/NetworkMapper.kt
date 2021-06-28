@@ -1,5 +1,6 @@
-package com.movie.moviehunt.datasource.remote
+package com.movie.moviehunt.datasource.remote.mapper
 
+import com.movie.moviehunt.datasource.remote.model.MovieNetworkEntity
 import com.movie.moviehunt.model.Movie
 import com.movie.moviehunt.util.EntityMapper
 import javax.inject.Inject

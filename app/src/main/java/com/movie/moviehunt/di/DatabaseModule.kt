@@ -2,8 +2,8 @@ package com.movie.moviehunt.di
 
 import android.content.Context
 import androidx.room.Room
-import com.movie.moviehunt.datasource.database.MovieDao
-import com.movie.moviehunt.datasource.database.MovieDatabase
+import com.movie.moviehunt.datasource.database.room.MovieDao
+import com.movie.moviehunt.datasource.database.room.MovieDatabase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

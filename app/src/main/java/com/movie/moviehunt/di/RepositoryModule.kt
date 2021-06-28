@@ -1,9 +1,9 @@
 package com.movie.moviehunt.di
 
-import com.movie.moviehunt.datasource.database.CacheMapper
-import com.movie.moviehunt.datasource.database.MovieDao
-import com.movie.moviehunt.datasource.remote.MovieService
-import com.movie.moviehunt.datasource.remote.NetworkMapper
+import com.movie.moviehunt.datasource.database.mapper.CacheMapper
+import com.movie.moviehunt.datasource.database.room.MovieDao
+import com.movie.moviehunt.datasource.remote.api.MovieService
+import com.movie.moviehunt.datasource.remote.mapper.NetworkMapper
 import com.movie.moviehunt.repository.MainRepository
 import dagger.Module
 import dagger.Provides

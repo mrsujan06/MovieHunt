@@ -1,4 +1,4 @@
-package com.movie.moviehunt.datasource.database
+package com.movie.moviehunt.datasource.database.model
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity

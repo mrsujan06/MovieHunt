@@ -1,5 +1,6 @@
-package com.movie.moviehunt.datasource.remote
+package com.movie.moviehunt.datasource.remote.api
 
+import com.movie.moviehunt.datasource.remote.model.MovieResponse
 import retrofit2.http.GET
 import retrofit2.http.Query
 
