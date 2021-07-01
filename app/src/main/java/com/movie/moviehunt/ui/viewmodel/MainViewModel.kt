@@ -1,47 +1,68 @@
 package com.movie.moviehunt.ui.viewmodel
 
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.movie.moviehunt.model.Movie
+import com.movie.moviehunt.base.BaseViewModel
+import com.movie.moviehunt.contract.MainContract
 import com.movie.moviehunt.repository.MainRepository
-import com.movie.moviehunt.util.DataState
+import com.movie.moviehunt.util.Resource
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
 
+@InternalCoroutinesApi
 @HiltViewModel
 class MainViewModel @Inject constructor(
     private val mainRepository: MainRepository
-) : ViewModel() {
+) : BaseViewModel<MainContract.Event, MainContract.State, MainContract.Effect>() {
 
-    private val _dataState =
-        MutableStateFlow<DataState<List<Movie>>>(DataState.Success(emptyList()))
-    val dataState: StateFlow<DataState<List<Movie>>>
-        get() = _dataState
+    override fun createInitialState(): MainContract.State {
+        return MainContract.State(
+            moviesState = MainContract.MovieState.Idle
+        )
+    }
 
-    fun setStateEvent(mainStateEvent: MainStateEvent) {
-        viewModelScope.launch(Dispatchers.IO) {
-            when (mainStateEvent) {
-                is MainStateEvent.GetMovieEvents -> {
-                    mainRepository.getPopularMovies()
-                        .onEach { dataState ->
-                            _dataState.value = dataState
-                            Timber.d("${_dataState.value}")
-                        }
-                        .launchIn(viewModelScope)
-                }
+    override fun handleEvent(event: MainContract.Event) {
+        when (event) {
+            is MainContract.Event.OnFetchPopularMovies -> {
+                fetchPopularMovies()
             }
         }
     }
-}
 
-sealed class MainStateEvent {
+    private fun fetchPopularMovies() {
+        viewModelScope.launch {
+            mainRepository.getPopularMovies()
+                .onStart { emit(Resource.Loading) }
+                .onEach {
+                    when (it) {
 
-    object GetMovieEvents : MainStateEvent()
+                        is Resource.Loading -> {
+                            // Set State
+                            setState { copy(moviesState = MainContract.MovieState.Loading) }
+                        }
+                        is Resource.Empty -> {
+                            // Set State
+                            setState { copy(moviesState = MainContract.MovieState.Idle) }
+                        }
+                        is Resource.Success -> {
+                            Timber.d("Movies : ${it.data}")
+                            // Set State
+                            setState { copy(moviesState = MainContract.MovieState.Success(movies = it.data)) }
+                        }
+                        is Resource.Error -> {
+                            // Set Effect
+                            setEffect { MainContract.Effect.ShowError(message = it.exception.message) }
+                        }
+
+                    }
+
+                }.launchIn(viewModelScope)
+
+        }
+    }
 }

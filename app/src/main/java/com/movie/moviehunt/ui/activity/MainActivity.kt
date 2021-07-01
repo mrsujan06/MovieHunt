@@ -5,15 +5,17 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.movie.moviehunt.model.Movie
-import com.movie.moviehunt.ui.screen.HomeScreen
+import com.movie.moviehunt.contract.MainContract
 import com.movie.moviehunt.ui.viewmodel.MainViewModel
-import com.movie.moviehunt.util.DataState
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.InternalCoroutinesApi
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.onEach
 import timber.log.Timber
 
+@InternalCoroutinesApi
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
@@ -22,30 +24,46 @@ class MainActivity : ComponentActivity() {
         setContent {
 
             val viewModel: MainViewModel = viewModel()
-            HomeScreen(viewModel)
             subscribeObservers(viewModel)
+
+            if (viewModel.currentState.moviesState is MainContract.MovieState.Idle)
+                viewModel.setEvent(MainContract.Event.OnFetchPopularMovies)
         }
     }
 
     private fun subscribeObservers(viewModel: MainViewModel) {
-        viewModel.dataState.onEach { dataState ->
 
-            when (dataState) {
-                is DataState.Success<List<Movie>> -> {
-                    displayProgressBar(false)
-                    displayPopularMovies(dataState.data)
+        lifecycleScope.launchWhenStarted {
+            viewModel.uiState.onEach { state ->
+                when (state.moviesState) {
+
+                    is MainContract.MovieState.Idle -> {
+                        displayProgressBar(false)
+                    }
+
+                    is MainContract.MovieState.Loading -> {
+                        displayProgressBar(true)
+                    }
+
+                    is MainContract.MovieState.Success -> {
+                        displayProgressBar(false)
+                        displayPopularMovies(state.moviesState)
+                    }
+
                 }
+            }
 
-                is DataState.Error -> {
-                    displayProgressBar(false)
-                    displayError(dataState.exception.message)
-                }
-
-                is DataState.Loading -> {
-                    displayProgressBar(true)
+            lifecycleScope.launchWhenStarted {
+                viewModel.effect.collect {
+                    when (it) {
+                        is MainContract.Effect.ShowError -> {
+                            displayError(it.message)
+                        }
+                    }
                 }
             }
         }
+
     }
 
     private fun displayError(message: String?) {
@@ -60,7 +78,7 @@ class MainActivity : ComponentActivity() {
         Timber.d("Displaying progress bar ... $isDisplayed")
     }
 
-    private fun displayPopularMovies(movie: List<Movie>) {
+    private fun displayPopularMovies(movie: MainContract.MovieState) {
         Timber.d("Movie list : $movie")
     }
 

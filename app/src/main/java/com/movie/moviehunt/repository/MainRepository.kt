@@ -6,9 +6,11 @@ import com.movie.moviehunt.datasource.remote.api.MovieService
 import com.movie.moviehunt.datasource.remote.mapper.NetworkMapper
 import com.movie.moviehunt.model.Movie
 import com.movie.moviehunt.util.Constants
-import com.movie.moviehunt.util.DataState
+import com.movie.moviehunt.util.Resource
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
 
 class MainRepository constructor(
     private val movieDao: MovieDao,
@@ -17,9 +19,7 @@ class MainRepository constructor(
     private val networkMapper: NetworkMapper
 ) {
 
-    suspend fun getPopularMovies(): Flow<DataState<List<Movie>>> = flow {
-        emit(DataState.Loading)
-
+    suspend fun getPopularMovies(): Flow<Resource<List<Movie>>> = flow {
         try {
             val networkMovie = movieService.getPopularMovies(Constants.API_KEY)
             val movies = networkMovie.movieNetworkEntities?.let { networkMapper.mapFromEntityList(it) }
@@ -31,11 +31,11 @@ class MainRepository constructor(
             }
 
             val cachedMovies = movieDao.get()
-            emit(DataState.Success(cacheMapper.mapFromEntityList(cachedMovies)))
+            emit(Resource.Success(cacheMapper.mapFromEntityList(cachedMovies)))
 
         } catch (e: Exception) {
-            emit(DataState.Error(e))
+            emit(Resource.Error(e))
         }
-    }
+    }.flowOn(Dispatchers.IO)
 
 }
